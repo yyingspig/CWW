@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.SysControl.mapper.SensorDataMapper">
+    
+    <resultMap type="SensorData" id="SensorDataResult">
+        <result property="id"    column="id"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="sensorType"    column="sensor_type"    />
+        <result property="dataValue"    column="data_value"    />
+        <result property="dataTime"    column="data_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSensorDataVo">
+        select id, device_id, sensor_type, data_value, data_time, create_time, update_time from sensor_data
+    </sql>
+
+    <select id="selectSensorDataList" parameterType="SensorData" resultMap="SensorDataResult">
+        <include refid="selectSensorDataVo"/>
+        <where>  
+            <if test="deviceId != null  and deviceId != ''"> and device_id = #{deviceId}</if>
+            <if test="sensorType != null  and sensorType != ''"> and sensor_type = #{sensorType}</if>
+            <if test="dataValue != null "> and data_value = #{dataValue}</if>
+            <if test="dataTime != null "> and data_time = #{dataTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectSensorDataById" parameterType="Long" resultMap="SensorDataResult">
+        <include refid="selectSensorDataVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertSensorData" parameterType="SensorData" useGeneratedKeys="true" keyProperty="id">
+        insert into sensor_data
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">device_id,</if>
+            <if test="sensorType != null and sensorType != ''">sensor_type,</if>
+            <if test="dataValue != null">data_value,</if>
+            <if test="dataTime != null">data_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">#{deviceId},</if>
+            <if test="sensorType != null and sensorType != ''">#{sensorType},</if>
+            <if test="dataValue != null">#{dataValue},</if>
+            <if test="dataTime != null">#{dataTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSensorData" parameterType="SensorData">
+        update sensor_data
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">device_id = #{deviceId},</if>
+            <if test="sensorType != null and sensorType != ''">sensor_type = #{sensorType},</if>
+            <if test="dataValue != null">data_value = #{dataValue},</if>
+            <if test="dataTime != null">data_time = #{dataTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSensorDataById" parameterType="Long">
+        delete from sensor_data where id = #{id}
+    </delete>
+
+    <delete id="deleteSensorDataByIds" parameterType="String">
+        delete from sensor_data where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
