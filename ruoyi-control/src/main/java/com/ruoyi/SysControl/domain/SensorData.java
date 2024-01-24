@@ -33,6 +33,9 @@ public class SensorData extends BaseEntity
     @Excel(name = "传感器数据值")
     private BigDecimal dataValue;
 
+    @Excel(name = "状态")
+    private String sensorStatus;
+
     /** 数据时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH-mm-ss")
     @Excel(name = "数据时间", width = 30, dateFormat = "yyyy-MM-dd HH-mm-ss")
@@ -70,11 +73,19 @@ public class SensorData extends BaseEntity
         this.dataValue = dataValue;
     }
 
-    public BigDecimal getDataValue() 
+    public String getSensorStatus() {
+        return sensorStatus;
+    }
+
+    public void setSensorStatus(String sensorStatus) {
+        this.sensorStatus = sensorStatus;
+    }
+
+    public BigDecimal getDataValue()
     {
         return dataValue;
     }
-    public void setDataTime(Date dataTime) 
+    public void setDataTime(Date dataTime)
     {
         this.dataTime = dataTime;
     }
@@ -91,6 +102,7 @@ public class SensorData extends BaseEntity
             .append("deviceId", getDeviceId())
             .append("sensorType", getSensorType())
             .append("dataValue", getDataValue())
+            .append("sensorStatus", getSensorStatus())
             .append("dataTime", getDataTime())
             .append("createTime", getCreateTime())
             .append("updateTime", getUpdateTime())

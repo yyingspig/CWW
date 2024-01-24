@@ -17,6 +17,14 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="传感器数据值" prop="sensorStatus">
+        <el-input
+          v-model="queryParams.sensorStatus"
+          placeholder="请输入传感器数据值"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="数据时间" prop="dataTime">
         <el-date-picker clearable
           v-model="queryParams.dataTime"
@@ -83,6 +91,7 @@
       <el-table-column label="设备ID" align="center" prop="deviceId" />
       <el-table-column label="传感器类型" align="center" prop="sensorType" />
       <el-table-column label="传感器数据值" align="center" prop="dataValue" />
+      <el-table-column label="状态" align="center" prop="sensorStatus" />
 <!--      <el-table-column label="数据时间" align="center" prop="dataTime" width="180">-->
 <!--        <template slot-scope="scope">-->
 <!--          <span>{{ scope.row.dataTime }}</span>-->
@@ -126,8 +135,11 @@
         <el-form-item label="传感器数据值" prop="dataValue">
           <el-input v-model="form.dataValue" placeholder="请输入传感器数据值" />
         </el-form-item>
-        <el-form-item label="传感器类型" prop="dataType">
+        <el-form-item label="传感器类型" prop="sensorType">
           <el-input v-model="form.sensorType" placeholder="请输入传感器类型" />
+        </el-form-item>
+        <el-form-item label="传感器状态" prop="sensorStatus">
+          <el-input v-model="form.sensorStatus" placeholder="请输入传感器状态" />
         </el-form-item>
 <!--        <el-form-item label="数据时间" prop="dataTime">-->
 <!--          <el-date-picker clearable-->
@@ -178,6 +190,7 @@ export default {
         deviceId: null,
         sensorType: null,
         dataValue: null,
+        sensorStatus: null,
         dataTime: null,
       },
       // 表单参数
@@ -192,6 +205,9 @@ export default {
         ],
         dataValue: [
           { required: true, message: "传感器数据值不能为空", trigger: "blur" }
+        ],
+        sensorStatus: [
+          { required: true, message: "传感器状态不能为空", trigger: "change" }
         ],
         dataTime: [
           { required: true, message: "数据时间不能为空", trigger: "blur" }
@@ -230,6 +246,7 @@ export default {
         deviceId: null,
         sensorType: null,
         dataValue: null,
+        sensorStatus: null,
         dataTime: null,
         createTime: null,
         updateTime: null
@@ -304,6 +321,14 @@ export default {
         ...this.queryParams
       }, `data_${new Date().getTime()}.xlsx`)
     }
+  },
+  watch:{
+    /** 监控数据值，打开弹窗提示 */
+    // "form.dataValue":{
+    //   handler(newValue){
+    //     console.log(this.form.dataValue)
+    //   }
+    // }
   }
 };
 </script>

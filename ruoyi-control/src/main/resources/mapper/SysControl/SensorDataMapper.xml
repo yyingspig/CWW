@@ -9,13 +9,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deviceId"    column="device_id"    />
         <result property="sensorType"    column="sensor_type"    />
         <result property="dataValue"    column="data_value"    />
+        <result property="sensorStatus" column="sensor_status" />
         <result property="dataTime"    column="data_time"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
     </resultMap>
 
     <sql id="selectSensorDataVo">
-        select id, device_id, sensor_type, data_value, data_time, create_time, update_time from sensor_data
+        select id, device_id, sensor_type, data_value, sensor_status, data_time, create_time, update_time from sensor_data
     </sql>
 
     <select id="selectSensorDataList" parameterType="SensorData" resultMap="SensorDataResult">
@@ -24,6 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deviceId != null  and deviceId != ''"> and device_id = #{deviceId}</if>
             <if test="sensorType != null  and sensorType != ''"> and sensor_type = #{sensorType}</if>
             <if test="dataValue != null "> and data_value = #{dataValue}</if>
+            <if test="sensorStatus != null "> and sensor_status = #{sensorStatus}</if>
             <if test="dataTime != null "> and data_time = #{dataTime}</if>
         </where>
     </select>
@@ -39,6 +41,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deviceId != null and deviceId != ''">device_id,</if>
             <if test="sensorType != null and sensorType != ''">sensor_type,</if>
             <if test="dataValue != null">data_value,</if>
+            <if test="sensorStatus != null">sensor_status,</if>
             <if test="dataTime != null">data_time,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
@@ -47,6 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deviceId != null and deviceId != ''">#{deviceId},</if>
             <if test="sensorType != null and sensorType != ''">#{sensorType},</if>
             <if test="dataValue != null">#{dataValue},</if>
+            <if test="sensorStatus != null">#{sensorStatus},</if>
             <if test="dataTime != null">#{dataTime},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
@@ -59,6 +63,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deviceId != null and deviceId != ''">device_id = #{deviceId},</if>
             <if test="sensorType != null and sensorType != ''">sensor_type = #{sensorType},</if>
             <if test="dataValue != null">data_value = #{dataValue},</if>
+            <if test="sensorStatus != null">sensor_status = #{sensorStatus},</if>
             <if test="dataTime != null">data_time = #{dataTime},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
