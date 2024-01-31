@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 /**
  * 传感器数据对象 sensor_data
  * 
- * @author ruoyi
+ * @author zhu
  * @date 2024-01-23
  */
 public class SensorData extends BaseEntity

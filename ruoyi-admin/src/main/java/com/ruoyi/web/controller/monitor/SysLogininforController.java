@@ -23,7 +23,7 @@ import com.ruoyi.system.service.ISysLogininforService;
 /**
  * 系统访问记录
  * 
- * @author ruoyi
+ * @author zhu
  */
 @RestController
 @RequestMapping("/monitor/logininfor")

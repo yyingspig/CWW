@@ -11,7 +11,7 @@ import com.ruoyi.SysControl.service.ISensorDataService;
 /**
  * 传感器数据Service业务层处理
  * 
- * @author ruoyi
+ * @author zhu
  * @date 2024-01-23
  */
 @Service

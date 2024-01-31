@@ -6,7 +6,7 @@ import com.ruoyi.SysControl.domain.SensorData;
 /**
  * 传感器数据Service接口
  * 
- * @author ruoyi
+ * @author zhu
  * @date 2024-01-23
  */
 public interface ISensorDataService 

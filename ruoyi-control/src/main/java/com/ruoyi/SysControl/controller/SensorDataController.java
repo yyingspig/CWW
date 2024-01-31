@@ -24,7 +24,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 /**
  * 传感器数据Controller
  * 
- * @author ruoyi
+ * @author zhu
  * @date 2024-01-23
  */
 @RestController
