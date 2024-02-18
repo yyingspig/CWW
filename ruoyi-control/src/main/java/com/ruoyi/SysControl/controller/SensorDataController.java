@@ -2,6 +2,8 @@ package com.ruoyi.SysControl.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.alibaba.fastjson2.JSONObject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -100,5 +102,31 @@ public class SensorDataController extends BaseController
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(sensorDataService.deleteSensorDataByIds(ids));
+    }
+
+    /**
+     * 获取传感器数据
+     * @param json
+     * @return
+     */
+    @PostMapping("/get")
+    public AjaxResult getData(JSONObject json) {
+        SensorData sensorData = new SensorData();
+        String sensorType = json.getString("sensorType");
+        if (sensorType.equals("Servo")) {
+            sensorData.setDeviceId("HX711");
+            sensorData.setSensorType(sensorType);
+            sensorData.setDataValue(json.getBigDecimal("data"));
+            add(sensorData);
+        } else {
+            sensorData.setDeviceId("DHT11");
+            sensorData.setSensorType("temperature");
+            sensorData.setDataValue(json.getBigDecimal("temperature"));
+            add(sensorData);
+            sensorData.setSensorType("humidity");
+            sensorData.setDataValue(json.getBigDecimal("humidity"));
+            add(sensorData);
+        }
+        return AjaxResult.success();
     }
 }
