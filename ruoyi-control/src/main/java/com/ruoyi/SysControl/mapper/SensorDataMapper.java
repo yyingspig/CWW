@@ -2,6 +2,7 @@ package com.ruoyi.SysControl.mapper;
 
 import java.util.List;
 import com.ruoyi.SysControl.domain.SensorData;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 传感器数据Mapper接口
@@ -9,6 +10,7 @@ import com.ruoyi.SysControl.domain.SensorData;
  * @author zhu
  * @date 2024-01-23
  */
+@Mapper
 public interface SensorDataMapper 
 {
     /**

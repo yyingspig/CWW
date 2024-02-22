@@ -42,3 +42,10 @@ export function delData(id) {
     method: 'delete'
   })
 }
+
+export function chartList() {
+  return request({
+    url: '/SysControl/data/test/list',
+    method: 'get'
+  })
+}

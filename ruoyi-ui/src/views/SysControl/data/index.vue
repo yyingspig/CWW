@@ -97,6 +97,14 @@
 <!--          <span>{{ scope.row.dataTime }}</span>-->
 <!--        </template>-->
 <!--      </el-table-column>-->
+      <!--        <el-form-item label="数据时间" prop="dataTime">-->
+      <!--          <el-date-picker clearable-->
+      <!--            v-model="form.dataTime"-->
+      <!--            type="date"-->
+      <!--            value-format="yyyy-MM-dd HH:mm:ss"-->
+      <!--            placeholder="请选择数据时间">-->
+      <!--          </el-date-picker>-->
+      <!--        </el-form-item>-->
       <el-table-column label="数据时间" align="center" prop="dataTime" width="180" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">

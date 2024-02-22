@@ -1,5 +1,6 @@
 package com.ruoyi.SysControl.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.SysControl.domain.SensorData;
 
@@ -58,4 +59,24 @@ public interface ISensorDataService
      * @return 结果
      */
     public int deleteSensorDataById(Long id);
+
+    /**
+     * 保存数据对象到数据库
+     * @param sensorData
+     * @param temperature
+     */
+    public void saveSensorDataToDatabase(SensorData sensorData, BigDecimal temperature);
+
+    /**
+     * 判断数据是否异常
+     * @param sensorData
+     * @return
+     */
+    public boolean isSensorDataException(BigDecimal temperature, BigDecimal humidity);
+
+    /**
+     * 获取数据
+     * @return
+     */
+    public List<SensorData> getListFromDatabase();
 }

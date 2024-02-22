@@ -1,5 +1,6 @@
 package com.ruoyi.SysControl.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,5 +94,29 @@ public class SensorDataServiceImpl implements ISensorDataService
     public int deleteSensorDataById(Long id)
     {
         return sensorDataMapper.deleteSensorDataById(id);
+    }
+
+    @Override
+    public void saveSensorDataToDatabase(SensorData sensorData, BigDecimal temperature) {
+        insertSensorData(sensorData);
+        if (!temperature.equals(100)) {
+            sensorData.setSensorType("temperature");
+            sensorData.setDataValue(temperature);
+            insertSensorData(sensorData);
+        }
+    }
+
+    @Override
+    public boolean isSensorDataException(BigDecimal temperature, BigDecimal humidity) {
+        // 判断传感器数据是否异常
+        return temperature.compareTo(new BigDecimal(40)) > 0;
+
+    }
+
+    @Override
+    public List<SensorData> getListFromDatabase() {
+        SensorData sensorData = new SensorData();
+        List<SensorData> list = selectSensorDataList(sensorData);
+        return list;
     }
 }
