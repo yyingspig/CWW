@@ -30,6 +30,15 @@ import com.ruoyi.SysControl.service.ISensorDataService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
 /**
  * 传感器数据Controller
  *
@@ -175,9 +184,49 @@ public class SensorDataController extends BaseController {
         return AjaxResult.success(chartData);
     }
 
-    @GetMapping("/test/switchLED")
+    @GetMapping("/test/switchLED")  // TODO 添加具体地址
     public AjaxResult switchLED() {
+        String channel = "__keyspace@0__:servo";
+        Jedis jedis = new Jedis("localhost");
 
+        jedis.subscribe(new JedisPubSub() {
+            @Override
+            public void onMessage(String channel, String message) {
+                if (message.equals("set")) {
+                    BigDecimal value = new BigDecimal(jedis.get("servo"));
+                    if (value.compareTo(new BigDecimal("100")) > 0) {
+                        // 触发事件
+                        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                            HttpGet request = new HttpGet("http://your-event-url");
+
+                            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+                                String responseBody = EntityUtils.toString(response.getEntity());
+                                System.out.println("Response Body : " + responseBody);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }, channel);
+        return AjaxResult.success();
+    }
+
+    @GetMapping("/test/duoji")
+    public AjaxResult duoji() {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet("http://url");
+
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+                String responseBody = EntityUtils.toString(response.getEntity());
+                System.out.println("Response Body : " + responseBody);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return AjaxResult.success();
     }
 }
