@@ -332,11 +332,13 @@ export default {
   },
   watch:{
     /** 监控数据值，打开弹窗提示 */
-    // "form.dataValue":{
-    //   handler(newValue){
-    //     console.log(this.form.dataValue)
-    //   }
-    // }
+    "form.dataValue":{
+      handler(newValue){
+        if (this.form.sensorType === 'temperature') {
+          console.log(this.form.dataValue)
+        }
+      }
+    }
   }
 };
 </script>

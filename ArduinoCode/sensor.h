@@ -1,7 +1,7 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
-#include <DHT.h>
+#include "Arduino.h"
 
 class Sensor {
   private:

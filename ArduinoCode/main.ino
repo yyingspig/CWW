@@ -1,4 +1,6 @@
 #include <SimpleTimer.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
 #include "sensor.h"
 #include "led.h"
 

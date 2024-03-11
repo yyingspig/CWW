@@ -13,14 +13,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.redis.RedisCache;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -196,17 +189,7 @@ public class SensorDataController extends BaseController {
                     BigDecimal value = new BigDecimal(jedis.get("servo"));
                     if (value.compareTo(new BigDecimal("100")) > 0) {
                         // 触发事件
-                        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                            HttpGet request = new HttpGet("http://your-event-url");
-
-                            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
-                                String responseBody = EntityUtils.toString(response.getEntity());
-                                System.out.println("Response Body : " + responseBody);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        led(1);
                     }
                 }
             }
@@ -214,10 +197,26 @@ public class SensorDataController extends BaseController {
         return AjaxResult.success();
     }
 
-    @GetMapping("/test/duoji")
-    public AjaxResult duoji() {
+    @GetMapping("/test/duoji/{num}")
+    public AjaxResult duoji(@RequestParam(name = "num") Integer num) {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet("http://url");
+            HttpGet request = new HttpGet("http://url?num=");
+
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+                String responseBody = EntityUtils.toString(response.getEntity());
+                System.out.println("Response Body : " + responseBody);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return AjaxResult.success();
+    }
+
+    @GetMapping("/test/led/{status}")
+    public AjaxResult led(@RequestParam(name = "status",required = false) int status) {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet("http://url?num=");
 
             try (CloseableHttpResponse response = httpClient.execute(request)) {
                 System.out.println("Response Code : " + response.getStatusLine().getStatusCode());

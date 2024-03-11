@@ -1,8 +1,7 @@
 #include "sensor.h"
-#include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266HTTPClient.h>
+#include "DHT.h"
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 Sensor::Sensor(int pin, int type) : dht(pin, type) {}
 
