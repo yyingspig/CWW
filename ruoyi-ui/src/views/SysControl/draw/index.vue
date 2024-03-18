@@ -3,14 +3,14 @@
     <div id="selectSection">
       <input type="date" v-model="selectedDate" @change="getChartData"/>
       <button @click="getChartData">选择日期</button>
-      <div id="line-chart-graph" ref="chart"></div>
+      <div class="echarts-chart" ref="chart"></div>
     </div>
   </div>
 </template>
 
 <script>
 import { chartList } from '@/api/SysControl/data'
-import * as d3 from 'd3'
+import * as echarts from '@/lib/echarts'
 
 export default {
   data() {
@@ -72,106 +72,48 @@ export default {
     },
 
     clearChart() {
-      d3.select(this.$refs.chart).selectAll("*").remove()
+      if (this.chartInstance) {
+        this.chartInstance.dispose();
+      }
     },
 
     createChart() {
-      const margin = { top: 10, right: 30, bottom: 30, left: 50 }
-      const totalWidth = 800
-      const totalHeight = 400
-      const width = totalWidth - margin.left - margin.right
-      const height = totalHeight - margin.top - margin.bottom
+      this.chartInstance = echarts.init(this.$refs.chart);
 
-      const svg = d3.select(this.$refs.chart)
-        .append('svg')
-        .attr('width', totalWidth)
-        .attr('height', totalHeight)
-        .append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`)
-
-      const x = d3.scaleTime()
-        .domain([new Date(`${this.selectedDate}T00:00:00`), new Date(`${this.selectedDate}T24:00:00`)])
-        .range([0, width])
-
-      const y = d3.scaleLinear()
-        .domain([0, d3.max(this.chartData, d => d3.max(d.data, c => c.y))])
-        .nice()
-        .range([height, 0])
-
-      const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat('%H')).ticks(24)
-      const yAxis = d3.axisLeft(y)
-
-      const line = d3.line()
-        .x(d => x(d.x))
-        .y(d => y(d.y))
-
-      this.chartData.forEach((series) => {
-        svg.append('path')
-          .datum(series.data)
-          .attr('fill', 'none')
-          .attr('stroke', series.color)
-          .attr('stroke-width', 1.5)
-          .attr('d', line)
-      })
-
-      svg.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0, ${height})`)
-        .call(xAxis)
-
-      svg.append('g')
-        .attr('class', 'y-axis')
-        .call(yAxis)
-
-      // 添加鼠标事件以绘制十字线并显示数据
-      let focus = svg.append("g")
-        .style("display", "none")
-
-      let tooltip = d3.select("#line-chart").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0)
-
-      svg.append("rect")
-        .style("fill", "none")
-        .style("pointer-events", "all")
-        .attr("width", width)
-        .attr("height", height)
-        .on("mouseover", () => { focus.style("display", null) })
-        .on("mouseout", () => { focus.style("display", "none"); tooltip.transition().duration(200).style("opacity", 0); })
-
-      // 添加圆点
-      svg.selectAll(".dot")
-        .data(this.chartData.flatMap(d => d.data))
-        .enter().append("circle")
-        .attr("class", "dot")
-        .attr("r", 4)
-        .attr("cx", d => x(d.x))
-        .attr("cy", d => y(d.y))
-        .style("fill", d => {
-          if (d.label === 'Temperature') {
-            return 'red';
-          } else if (d.label === 'Humidity') {
-            return 'blue';
-          } else {
-            return 'green';
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            animation: false
           }
-        })
-        .on("mouseover", (event, d) => {
-          tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-          const formatTime = d3.timeFormat("%Y-%m-%d %H:%M");
-          tooltip.html(`<strong>${d.label}:</strong> ${d.y}<br/><strong>时间:</strong> ${formatTime(d.x)}`)
-            .style("display", "block"); // 显示tooltip
-        })
-        .on("mouseout", () => {
-          tooltip.transition()
-            .duration(500)
-            .style("opacity", 0)
-            .on("end", () => {
-              tooltip.style("display", "none"); // 鼠标移出时隐藏tooltip
-            });
-        });
+        },
+        xAxis: {
+          type: 'time',
+          boundaryGap: false,
+          splitLine: {
+            show: false
+          }
+        },
+        yAxis: {
+          type: 'value',
+          boundaryGap: ['0', '100%'],
+          splitLine: {
+            show: true
+          }
+        },
+        series: this.chartData.map(series => ({
+          name: series.label,
+          type: 'line',
+          showSymbol: true,
+          hoverAnimation: false,
+          data: series.data.map(d => ([d.x, d.y])),
+          lineStyle: {
+            color: series.color
+          }
+        }))
+      };
+
+      this.chartInstance.setOption(option);
     }
   }
 }
@@ -208,22 +150,8 @@ button {
   cursor: pointer;
 }
 
-svg {
-  font-family: "Microsoft YaHei", Arial, Helvetica, sans-serif, "宋体";
+.echarts-chart {
+  width: 800px;
+  height: 400px;
 }
-
-.tooltip {
-  position: fixed;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  pointer-events: none;
-  z-index: 999; /* 确保tooltip在最顶层 */
-  display: none; /* 初始化设置为隐藏 */
-
-  /* 添加浮窗效果 */
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
-}
-
 </style>
