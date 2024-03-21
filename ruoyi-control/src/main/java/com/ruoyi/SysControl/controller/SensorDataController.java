@@ -11,6 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.redis.RedisCache;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,15 +31,9 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-
 /**
  * 传感器数据Controller
- *
+ * 
  * @author zhu
  * @date 2024-01-23
  */
@@ -189,12 +188,19 @@ public class SensorDataController extends BaseController {
                     BigDecimal value = new BigDecimal(jedis.get("servo"));
                     if (value.compareTo(new BigDecimal("100")) > 0) {
                         // 触发事件
-                        led(1);
+//                        led(1);
+                        System.out.println("servo超过100！！！！");
                     }
                 }
             }
         }, channel);
         return AjaxResult.success();
+    }
+
+    @GetMapping("/test/servo")
+    public AjaxResult servo(@RequestParam(name = "num") Integer num) {
+        redisCache.setCacheObject("servo",num.toString());
+        return AjaxResult.success(num);
     }
 
     @GetMapping("/test/duoji/{num}")
