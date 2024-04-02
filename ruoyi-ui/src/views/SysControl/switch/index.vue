@@ -1,19 +1,37 @@
 <template>
   <div>
-    <img v-if="ledStatus === 0" src="@/assets/images/ledoff.jpg" @click="controlLed(1)" />
-    <img v-else src="@/assets/images/ledon.jpg" @click="controlLed(0)" />
-    <!-- 其他传感器的图片控制类似，可以依此类推 -->
+    <div class="button-container">
+      <div class="button-wrapper">
+        <img v-if="ledStatus === 0" src="@/assets/images/ledoff.jpg" @click="controlLed(1)" />
+        <img v-else src="@/assets/images/ledon.jpg" @click="controlLed(0)" />
+      </div>
+      <div class="button-wrapper">
+        <img v-if="SG90Status === 0" src="@/assets/images/ledoff.jpg" @click="controlSG90(1)" />
+        <img v-else src="@/assets/images/ledon.jpg" @click="controlSG90(0)" />
+      </div>
+    </div>
+    <div class="button-container">
+      <div class="button-wrapper">
+        <img v-if="SG90Status === 0" src="@/assets/images/ledoff.jpg" @click="controlSG90(1)" />
+        <img v-else src="@/assets/images/ledon.jpg" @click="controlSG90(0)" />
+      </div>
+      <div class="button-wrapper">
+        <img v-if="SG90Status === 0" src="@/assets/images/ledoff.jpg" @click="controlSG90(1)" />
+        <img v-else src="@/assets/images/ledon.jpg" @click="controlSG90(0)" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 
-import {sendLED} from '@/api/SysControl/data';
+import { sendLED, sendSG90 } from '@/api/SysControl/data'
 
 export default {
   data() {
     return {
-      ledStatus: 0 // 初始状态为关
+      ledStatus: 0, // 初始状态为关
+      SG90Status: 0 // 初始状态为关
     };
   },
   methods: {
@@ -23,12 +41,32 @@ export default {
         console.log(response.data);
         // 更新LED状态
         this.ledStatus = action === 1 ? 1 : 0;
-      })
-        .catch(error => {
+      }).catch(error => {
           console.error('Error controlling LED:', error);
         });
+    },
+    controlSG90(value) {
+      // 调用后端接口，发送控制指令
+      sendSG90(value).then(response => {
+        console.log(response.data);
+        // 更新LED状态
+        this.SG90Status = value === 1 ? 1 : 0;
+      }).catch(error => {
+        console.error('Error controlling SG90:', error);
+      });
     }
-    // 其他传感器的控制方法类似，可以依此类推
   }
 };
 </script>
+
+<style scoped>
+.button-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.button-wrapper {
+  flex: 1;
+  text-align: center;
+}
+</style>

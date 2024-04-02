@@ -56,3 +56,10 @@ export function sendLED(status) {
     method: 'get'
   })
 }
+
+export function sendSG90(value) {
+  return request({
+    url: '/SysControl/data/test/duoji/' + value,
+    method: 'get'
+  })
+}

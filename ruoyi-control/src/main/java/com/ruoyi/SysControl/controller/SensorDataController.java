@@ -225,8 +225,9 @@ public class SensorDataController extends BaseController {
     }
 
     @GetMapping("/test/duoji/{num}")
-    public AjaxResult duoji(@RequestParam(name = "num") Integer num) {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+    public AjaxResult duoji(@PathVariable(name = "num") Integer num) {
+        System.out.println(num);
+        /*try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet request = new HttpGet("http://url?num=");
 
             try (CloseableHttpResponse response = httpClient.execute(request)) {
@@ -236,7 +237,7 @@ public class SensorDataController extends BaseController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
         return AjaxResult.success();
     }
 
