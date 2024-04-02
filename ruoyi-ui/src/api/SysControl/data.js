@@ -49,3 +49,10 @@ export function chartList() {
     method: 'get'
   })
 }
+
+export function sendLED(status) {
+  return request({
+    url: '/SysControl/data/test/led/' + status,
+    method: 'get'
+  })
+}

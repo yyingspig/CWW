@@ -195,6 +195,27 @@ public class SensorDataController extends BaseController {
             }
         }, channel);
         return AjaxResult.success();
+        /*new Thread(() -> {
+            String channel = "__keyspace@0__:servo";
+            Jedis jedis = new Jedis("localhost");
+
+            jedis.subscribe(new JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    System.out.println("进入jk");
+                    if (message.equals("set")) {
+                        System.out.println("监控到set");
+                        BigDecimal value = new BigDecimal(jedis.get("servo"));
+                        if (value.compareTo(new BigDecimal("100")) > 0) {
+                            // 触发事件
+                            System.out.println("servo超过100！！！！");
+                        }
+                    }
+                }
+            }, channel);
+        }).start();
+
+        return AjaxResult.success("开启监听");*/
     }
 
     @GetMapping("/test/servo")
@@ -220,18 +241,19 @@ public class SensorDataController extends BaseController {
     }
 
     @GetMapping("/test/led/{status}")
-    public AjaxResult led(@RequestParam(name = "status",required = false) int status) {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet("http://url?num=");
-
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
-                String responseBody = EntityUtils.toString(response.getEntity());
-                System.out.println("Response Body : " + responseBody);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public AjaxResult led(@PathVariable("status") int status) {
+//        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+//            HttpGet request = new HttpGet("http://url?num=");
+//
+//            try (CloseableHttpResponse response = httpClient.execute(request)) {
+//                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+//                String responseBody = EntityUtils.toString(response.getEntity());
+//                System.out.println("Response Body : " + responseBody);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        System.out.println("!status:" + status);
         return AjaxResult.success();
     }
 }
