@@ -12,8 +12,7 @@
     </div>
     <div class="button-container">
       <div class="button-wrapper">
-        <img v-if="SG90Status === 0" src="@/assets/images/ledoff.jpg" @click="controlSG90(1)" />
-        <img v-else src="@/assets/images/ledon.jpg" @click="controlSG90(0)" />
+        <img src="@/assets/images/ledoff.jpg" @click="resetSG90()" />
       </div>
       <div class="button-wrapper">
         <img v-if="SG90Status === 0" src="@/assets/images/ledoff.jpg" @click="controlSG90(1)" />
@@ -25,7 +24,7 @@
 
 <script>
 
-import { sendLED, sendSG90 } from '@/api/SysControl/data'
+import { sendLED, sendSG90, sendResetSG90 } from '@/api/SysControl/data'
 
 export default {
   data() {
@@ -38,7 +37,6 @@ export default {
     controlLed(action) {
       // 调用后端接口，发送控制指令
       sendLED(action).then(response => {
-        console.log(response.data);
         // 更新LED状态
         this.ledStatus = action === 1 ? 1 : 0;
       }).catch(error => {
@@ -47,7 +45,16 @@ export default {
     },
     controlSG90(value) {
       // 调用后端接口，发送控制指令
-      sendSG90(value).then(response => {
+      sendSG90(value === 1 ? 0 : 90).then(response => {
+        console.log(response.data);
+        // 更新LED状态
+        this.SG90Status = value === 1 ? 1 : 0;
+      }).catch(error => {
+        console.error('Error controlling SG90:', error);
+      });
+    },
+    resetSG90() {
+      sendResetSG90().then(response => {
         console.log(response.data);
         // 更新LED状态
         this.SG90Status = value === 1 ? 1 : 0;

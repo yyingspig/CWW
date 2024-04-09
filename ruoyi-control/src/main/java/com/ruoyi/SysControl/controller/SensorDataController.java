@@ -11,11 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.redis.RedisCache;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +23,12 @@ import com.ruoyi.SysControl.service.ISensorDataService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPubSub;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
 
 /**
  * 传感器数据Controller
@@ -116,45 +115,57 @@ public class SensorDataController extends BaseController {
      */
     @PostMapping("/test/get")
     public AjaxResult getData(@RequestBody JSONObject json) {
-        SensorData sensorData = new SensorData();
-        BigDecimal temperature = new BigDecimal(100);
+        List<SensorData> list = new ArrayList<>();
         String sensorType = json.getString("sensorType");
         if (sensorType.equals("servo")) {
-            sensorData.setDeviceId("HX711");
-            sensorData.setSensorType(sensorType);
-            sensorData.setDataValue(json.getBigDecimal("data"));
-            if (json.getString("status").isEmpty()) {
-                sensorData.setSensorStatus("正常");
+            SensorData servoData = new SensorData();
+            servoData.setDeviceId("HX711");
+            servoData.setSensorType(sensorType);
+            BigDecimal data = json.getBigDecimal("data");
+            // 若大于50则标记异常
+            if (data.compareTo(new BigDecimal(50)) > 0) {
+                servoData.setSensorStatus("异常");
             } else {
-                sensorData.setSensorStatus(json.getString("status"));
+                servoData.setSensorStatus("正常");
             }
-            redisCache.setCacheObject("servo", sensorData, 5, TimeUnit.MINUTES);
+            servoData.setDataValue(data);
+            list.add(servoData);
+            redisCache.setCacheObject("servo", servoData.getDataValue(), 5, TimeUnit.MINUTES);
         } else {
-            temperature = json.getBigDecimal("temperature");
-            sensorData.setDeviceId("DHT11");
-            sensorData.setSensorType("temperature");
-            sensorData.setDataValue(temperature);
-            if (json.getString("status").isEmpty()) {
-                sensorData.setSensorStatus("正常");
+            SensorData wdData = new SensorData();
+            SensorData sdData = new SensorData();
+            BigDecimal temperature = json.getBigDecimal("temperature");
+            BigDecimal humidity = json.getBigDecimal("humidity");
+            wdData.setDeviceId("DHT11");
+            sdData.setDeviceId("DHT11");
+            wdData.setSensorType("temperature");
+            sdData.setSensorType("humidity");
+            wdData.setDataValue(temperature);
+            sdData.setDataValue(humidity);
+            list.add(wdData);
+            list.add(sdData);
+            if (temperature.compareTo(new BigDecimal(100)) > 0) {
+                wdData.setSensorStatus("异常");
             } else {
-                sensorData.setSensorStatus(json.getString("status"));
+                wdData.setSensorStatus("正常");
             }
-            redisCache.setCacheObject("temperature", sensorData, 5, TimeUnit.MINUTES);
-            sensorData.setSensorType("humidity");
-            sensorData.setDataValue(json.getBigDecimal("humidity"));
-            redisCache.setCacheObject("humidity", sensorData, 5, TimeUnit.MINUTES);
+            if (humidity.compareTo(new BigDecimal(100)) > 0) {
+                sdData.setSensorStatus("异常");
+            } else {
+                sdData.setSensorStatus("正常");
+            }
+            redisCache.setCacheObject("temperature", wdData, 5, TimeUnit.MINUTES);
+            redisCache.setCacheObject("humidity", sdData, 5, TimeUnit.MINUTES);
         }
-
         // 判断是否为整点数据或异常数据
         LocalDateTime now = LocalDateTime.now();
         int minute = now.getMinute();
         if (minute == 0) { // 整点数据
-            sensorDataService.saveSensorDataToDatabase(sensorData, temperature);
+            sensorDataService.saveSensorDataToDatabase(list);
         } else {
-            if (sensorDataService.isSensorDataException(temperature,sensorData.getDataValue())) { // 异常数据
-                sensorData.setSensorStatus("异常");
-                sensorDataService.saveSensorDataToDatabase(sensorData, temperature);
-            }
+            list = sensorDataService.isSensorDataException(list);
+            sensorDataService.saveSensorDataToDatabase(list);
+            return AjaxResult.warn("数据异常!请及时处理!");
         }
 
         return AjaxResult.success();
@@ -176,46 +187,10 @@ public class SensorDataController extends BaseController {
         return AjaxResult.success(chartData);
     }
 
-    @GetMapping("/test/switchLED")  // TODO 添加具体地址
-    public AjaxResult switchLED() {
-        String channel = "__keyspace@0__:servo";
-        Jedis jedis = new Jedis("localhost");
-
-        jedis.subscribe(new JedisPubSub() {
-            @Override
-            public void onMessage(String channel, String message) {
-                if (message.equals("set")) {
-                    BigDecimal value = new BigDecimal(jedis.get("servo"));
-                    if (value.compareTo(new BigDecimal("100")) > 0) {
-                        // 触发事件
-//                        led(1);
-                        System.out.println("servo超过100！！！！");
-                    }
-                }
-            }
-        }, channel);
-        return AjaxResult.success();
-        /*new Thread(() -> {
-            String channel = "__keyspace@0__:servo";
-            Jedis jedis = new Jedis("localhost");
-
-            jedis.subscribe(new JedisPubSub() {
-                @Override
-                public void onMessage(String channel, String message) {
-                    System.out.println("进入jk");
-                    if (message.equals("set")) {
-                        System.out.println("监控到set");
-                        BigDecimal value = new BigDecimal(jedis.get("servo"));
-                        if (value.compareTo(new BigDecimal("100")) > 0) {
-                            // 触发事件
-                            System.out.println("servo超过100！！！！");
-                        }
-                    }
-                }
-            }, channel);
-        }).start();
-
-        return AjaxResult.success("开启监听");*/
+    @GetMapping("/test/switchLED/{status}")
+    public AjaxResult switchLED(@PathVariable("status") int status) {
+        sensorDataService.switchLED(status);
+        return AjaxResult.success("test");
     }
 
     @GetMapping("/test/servo")
@@ -226,35 +201,30 @@ public class SensorDataController extends BaseController {
 
     @GetMapping("/test/duoji/{num}")
     public AjaxResult duoji(@PathVariable(name = "num") Integer num) {
-        System.out.println(num);
-        /*try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet("http://url?num=");
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet("http://192.168.137.61/rotate?angle=" + num);
+            System.out.println("num=" + num);
 
             try (CloseableHttpResponse response = httpClient.execute(request)) {
-                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
-                String responseBody = EntityUtils.toString(response.getEntity());
-                System.out.println("Response Body : " + responseBody);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-        return AjaxResult.success();
-    }
-
-    @GetMapping("/test/led/{status}")
-    public AjaxResult led(@PathVariable("status") int status) {
-//        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-//            HttpGet request = new HttpGet("http://url?num=");
-//
-//            try (CloseableHttpResponse response = httpClient.execute(request)) {
 //                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 //                String responseBody = EntityUtils.toString(response.getEntity());
 //                System.out.println("Response Body : " + responseBody);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        System.out.println("!status:" + status);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return AjaxResult.success();
     }
+
+    @GetMapping("/test/duoji")
+    public AjaxResult resetDuoji() {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet("http://192.168.137.61/reset");
+            httpClient.execute(request);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return AjaxResult.success();
+    }
+
 }

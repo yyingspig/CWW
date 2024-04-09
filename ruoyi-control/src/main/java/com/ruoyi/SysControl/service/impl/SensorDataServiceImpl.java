@@ -1,6 +1,10 @@
 package com.ruoyi.SysControl.service.impl;
 
-import java.math.BigDecimal;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,20 +101,17 @@ public class SensorDataServiceImpl implements ISensorDataService
     }
 
     @Override
-    public void saveSensorDataToDatabase(SensorData sensorData, BigDecimal temperature) {
-        insertSensorData(sensorData);
-        if (!temperature.equals(100)) {
-            sensorData.setSensorType("temperature");
-            sensorData.setDataValue(temperature);
+    public void saveSensorDataToDatabase(List<SensorData> list) {
+        for (SensorData sensorData : list) {
             insertSensorData(sensorData);
         }
     }
 
     @Override
-    public boolean isSensorDataException(BigDecimal temperature, BigDecimal humidity) {
-        // 判断传感器数据是否异常
-        return temperature.compareTo(new BigDecimal(40)) > 0;
-
+    public List<SensorData> isSensorDataException(List<SensorData> list) {
+        // 剔除传感器正常数据
+       list.removeIf(sensorData -> !sensorData.getSensorStatus().equals("异常"));
+       return list;
     }
 
     @Override
@@ -119,4 +120,20 @@ public class SensorDataServiceImpl implements ISensorDataService
         List<SensorData> list = selectSensorDataList(sensorData);
         return list;
     }
+
+    @Override
+    public void switchLED(int status) {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet("http://192.168.137.61/led?num=" + status);
+
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+//                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+//                String responseBody = EntityUtils.toString(response.getEntity());
+//                System.out.println("Response Body : " + responseBody);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

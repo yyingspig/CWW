@@ -62,21 +62,23 @@ public interface ISensorDataService
 
     /**
      * 保存数据对象到数据库
-     * @param sensorData
-     * @param temperature
+     * @param list
      */
-    public void saveSensorDataToDatabase(SensorData sensorData, BigDecimal temperature);
+    public void saveSensorDataToDatabase(List<SensorData> list);
 
     /**
      * 判断数据是否异常
-     * @param sensorData
+     * @param list
      * @return
      */
-    public boolean isSensorDataException(BigDecimal temperature, BigDecimal humidity);
+    public List<SensorData> isSensorDataException(List<SensorData> list);
 
     /**
      * 获取数据
      * @return
      */
     public List<SensorData> getListFromDatabase();
+
+    void switchLED(int status);
+
 }

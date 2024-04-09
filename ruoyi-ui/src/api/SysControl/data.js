@@ -52,7 +52,7 @@ export function chartList() {
 
 export function sendLED(status) {
   return request({
-    url: '/SysControl/data/test/led/' + status,
+    url: '/SysControl/data/test/switchLED/' + status,
     method: 'get'
   })
 }
@@ -60,6 +60,13 @@ export function sendLED(status) {
 export function sendSG90(value) {
   return request({
     url: '/SysControl/data/test/duoji/' + value,
+    method: 'get'
+  })
+}
+
+export function sendResetSG90() {
+  return request({
+    url: '/SysControl/data/test/duoji',
     method: 'get'
   })
 }
