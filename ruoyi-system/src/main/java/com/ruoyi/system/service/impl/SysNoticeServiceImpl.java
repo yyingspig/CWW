@@ -89,4 +89,9 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     {
         return noticeMapper.deleteNoticeByIds(noticeIds);
     }
+
+    @Override
+    public List<SysNotice> selectNoticeUnreadList(SysNotice notice) {
+        return noticeMapper.selectNoticeUnreadList(notice);
+    }
 }

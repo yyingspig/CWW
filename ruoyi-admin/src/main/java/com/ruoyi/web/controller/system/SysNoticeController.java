@@ -44,6 +44,15 @@ public class SysNoticeController extends BaseController
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('system:notice:list')")
+    @GetMapping("/listUnread")
+    public TableDataInfo listUnread(SysNotice notice)
+    {
+        startPage();
+        List<SysNotice> list = noticeService.selectNoticeUnreadList(notice);
+        return getDataTable(list);
+    }
+
     /**
      * 根据通知公告编号获取详细信息
      */

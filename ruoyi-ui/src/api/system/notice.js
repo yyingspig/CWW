@@ -9,6 +9,14 @@ export function listNotice(query) {
   })
 }
 
+export function listUnreadNotice(query) {
+  return request({
+    url: '/system/notice/listUnread',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询公告详细
 export function getNotice(noticeId) {
   return request({

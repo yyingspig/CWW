@@ -110,6 +110,12 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:notice:remove']"
           >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="openDetailDialog(scope.row.noticeId)"
+          >查看</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -166,6 +172,22 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+
+    <!--通知公告详情 -->
+    <el-dialog :title="form.noticeTitle" :visible.sync="openDetail" width="800px" append-to-body>
+      <div style="margin-top:-20px;margin-bottom:10px;">
+        <el-tag size="mini" effect="dark" type="warning" v-if="form.noticeType==2">公告</el-tag>
+        <el-tag size="mini" effect="dark" v-else>信息</el-tag>
+        <span style="margin-left:20px;">{{form.createTime}}</span>
+      </div>
+      <div v-loading="loadingDetail" class="content">
+        <div v-html="form.noticeContent" style="margin-left:0px;margin-right:76px" class="ql-editor"></div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="closeDetail"> 关 闭 </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -179,6 +201,10 @@ export default {
     return {
       // 遮罩层
       loading: true,
+      // 详情加载
+      loadingDetail: false,
+      // 打开详情
+      openDetail: false,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -276,6 +302,22 @@ export default {
         this.open = true;
         this.title = "修改公告";
       });
+    },
+    // 打开信息详情
+    openDetailDialog(id) {
+      this.openDetail = true;
+      this.loadingDetail = true;
+      getNotice(id).then(response => {
+        this.form = response.data;
+        this.openDetail = true;
+        this.loadingDetail = false;
+      });
+    },
+    // 取消按钮
+    closeDetail() {
+      this.titleDetail = "详情";
+      this.openDetail = false;
+      this.reset();
     },
     /** 提交按钮 */
     submitForm: function() {
