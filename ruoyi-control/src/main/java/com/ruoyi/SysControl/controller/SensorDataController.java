@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.redis.RedisCache;
+import com.ruoyi.system.domain.SysNotice;
+import com.ruoyi.system.service.ISysNoticeService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +29,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
 
 /**
@@ -44,6 +45,9 @@ public class SensorDataController extends BaseController {
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private ISysNoticeService noticeService;
 
     /**
      * 查询传感器数据列表
@@ -165,6 +169,12 @@ public class SensorDataController extends BaseController {
         } else {
             list = sensorDataService.isSensorDataException(list);
             sensorDataService.saveSensorDataToDatabase(list);
+            SysNotice sysNotice = new SysNotice();
+            sysNotice.setNoticeTitle("数据异常");
+            sysNotice.setNoticeType("1");
+            sysNotice.setStatus("0");
+            sysNotice.setNoticeContent("数据异常!请及时处理!");
+            noticeService.insertNotice(sysNotice);
             return AjaxResult.warn("数据异常!请及时处理!");
         }
 
@@ -226,5 +236,7 @@ public class SensorDataController extends BaseController {
         }
         return AjaxResult.success();
     }
+
+
 
 }

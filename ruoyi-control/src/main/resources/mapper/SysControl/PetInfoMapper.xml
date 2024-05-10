@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.SysControl.mapper.PetInfoMapper">
+    
+    <resultMap type="PetInfo" id="PetInfoResult">
+        <result property="petId"    column="pet_id"    />
+        <result property="petName"    column="pet_name"    />
+        <result property="species"    column="species"    />
+        <result property="age"    column="age"    />
+        <result property="gender"    column="gender"    />
+        <result property="weight"    column="weight"    />
+        <result property="vaccinationStatus"    column="vaccination_status"    />
+        <result property="ownerId"    column="owner_id"    />
+    </resultMap>
+
+    <sql id="selectPetInfoVo">
+        select pet_id, pet_name, species, age, gender, weight, vaccination_status, owner_id from pet_info
+    </sql>
+
+    <select id="selectPetInfoList" parameterType="PetInfo" resultMap="PetInfoResult">
+        <include refid="selectPetInfoVo"/>
+        <where>  
+            <if test="petName != null  and petName != ''"> and pet_name like concat('%', #{petName}, '%')</if>
+            <if test="species != null  and species != ''"> and species = #{species}</if>
+            <if test="age != null "> and age = #{age}</if>
+            <if test="gender != null  and gender != ''"> and gender = #{gender}</if>
+            <if test="weight != null "> and weight = #{weight}</if>
+            <if test="vaccinationStatus != null "> and vaccination_status = #{vaccinationStatus}</if>
+            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
+        </where>
+    </select>
+    
+    <select id="selectPetInfoByPetId" parameterType="Long" resultMap="PetInfoResult">
+        <include refid="selectPetInfoVo"/>
+        where pet_id = #{petId}
+    </select>
+        
+    <insert id="insertPetInfo" parameterType="PetInfo" useGeneratedKeys="true" keyProperty="petId">
+        insert into pet_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="petName != null">pet_name,</if>
+            <if test="species != null">species,</if>
+            <if test="age != null">age,</if>
+            <if test="gender != null">gender,</if>
+            <if test="weight != null">weight,</if>
+            <if test="vaccinationStatus != null">vaccination_status,</if>
+            <if test="ownerId != null">owner_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="petName != null">#{petName},</if>
+            <if test="species != null">#{species},</if>
+            <if test="age != null">#{age},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="weight != null">#{weight},</if>
+            <if test="vaccinationStatus != null">#{vaccinationStatus},</if>
+            <if test="ownerId != null">#{ownerId},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePetInfo" parameterType="PetInfo">
+        update pet_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="petName != null">pet_name = #{petName},</if>
+            <if test="species != null">species = #{species},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="vaccinationStatus != null">vaccination_status = #{vaccinationStatus},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+        </trim>
+        where pet_id = #{petId}
+    </update>
+
+    <delete id="deletePetInfoByPetId" parameterType="Long">
+        delete from pet_info where pet_id = #{petId}
+    </delete>
+
+    <delete id="deletePetInfoByPetIds" parameterType="String">
+        delete from pet_info where pet_id in 
+        <foreach item="petId" collection="array" open="(" separator="," close=")">
+            #{petId}
+        </foreach>
+    </delete>
+</mapper>

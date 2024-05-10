@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.SysControl.mapper.PetBoardingMapper">
+    
+    <resultMap type="PetBoarding" id="PetBoardingResult">
+        <result property="boardingId"    column="boarding_id"    />
+        <result property="petId"    column="pet_id"    />
+        <result property="boardingHouseNumber"    column="boarding_house_number"    />
+        <result property="checkInDate"    column="check_in_date"    />
+        <result property="stayDays"    column="stay_days"    />
+        <result property="checkOutDate"    column="check_out_date"    />
+        <result property="ownerId"    column="owner_id"    />
+    </resultMap>
+
+    <sql id="selectPetBoardingVo">
+        select boarding_id, pet_id, boarding_house_number, check_in_date, stay_days, check_out_date, owner_id from pet_boarding
+    </sql>
+
+    <select id="selectPetBoardingList" parameterType="PetBoarding" resultMap="PetBoardingResult">
+        <include refid="selectPetBoardingVo"/>
+        <where>  
+            <if test="petId != null "> and pet_id = #{petId}</if>
+            <if test="boardingHouseNumber != null  and boardingHouseNumber != ''"> and boarding_house_number = #{boardingHouseNumber}</if>
+            <if test="checkInDate != null "> and check_in_date = #{checkInDate}</if>
+            <if test="stayDays != null "> and stay_days = #{stayDays}</if>
+            <if test="checkOutDate != null "> and check_out_date = #{checkOutDate}</if>
+            <if test="ownerId != null "> and owner_id = #{ownerId}</if>
+        </where>
+    </select>
+    
+    <select id="selectPetBoardingByBoardingId" parameterType="Long" resultMap="PetBoardingResult">
+        <include refid="selectPetBoardingVo"/>
+        where boarding_id = #{boardingId}
+    </select>
+        
+    <insert id="insertPetBoarding" parameterType="PetBoarding" useGeneratedKeys="true" keyProperty="boardingId">
+        insert into pet_boarding
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="petId != null">pet_id,</if>
+            <if test="boardingHouseNumber != null">boarding_house_number,</if>
+            <if test="checkInDate != null">check_in_date,</if>
+            <if test="stayDays != null">stay_days,</if>
+            <if test="checkOutDate != null">check_out_date,</if>
+            <if test="ownerId != null">owner_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="petId != null">#{petId},</if>
+            <if test="boardingHouseNumber != null">#{boardingHouseNumber},</if>
+            <if test="checkInDate != null">#{checkInDate},</if>
+            <if test="stayDays != null">#{stayDays},</if>
+            <if test="checkOutDate != null">#{checkOutDate},</if>
+            <if test="ownerId != null">#{ownerId},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePetBoarding" parameterType="PetBoarding">
+        update pet_boarding
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="petId != null">pet_id = #{petId},</if>
+            <if test="boardingHouseNumber != null">boarding_house_number = #{boardingHouseNumber},</if>
+            <if test="checkInDate != null">check_in_date = #{checkInDate},</if>
+            <if test="stayDays != null">stay_days = #{stayDays},</if>
+            <if test="checkOutDate != null">check_out_date = #{checkOutDate},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+        </trim>
+        where boarding_id = #{boardingId}
+    </update>
+
+    <delete id="deletePetBoardingByBoardingId" parameterType="Long">
+        delete from pet_boarding where boarding_id = #{boardingId}
+    </delete>
+
+    <delete id="deletePetBoardingByBoardingIds" parameterType="String">
+        delete from pet_boarding where boarding_id in 
+        <foreach item="boardingId" collection="array" open="(" separator="," close=")">
+            #{boardingId}
+        </foreach>
+    </delete>
+</mapper>
