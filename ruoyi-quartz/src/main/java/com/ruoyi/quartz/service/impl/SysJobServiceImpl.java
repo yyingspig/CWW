@@ -258,4 +258,9 @@ public class SysJobServiceImpl implements ISysJobService
     {
         return CronUtils.isValid(cronExpression);
     }
+
+    @Override
+    public void updateFeedJob(String cron) {
+        jobMapper.updateFeedJob(cron);
+    }
 }

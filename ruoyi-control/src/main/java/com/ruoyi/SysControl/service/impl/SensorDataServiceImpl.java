@@ -124,12 +124,12 @@ public class SensorDataServiceImpl implements ISensorDataService
     @Override
     public void switchLED(int status) {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet("http://192.168.137.61/led?num=" + status);
+            HttpGet request = new HttpGet("http://192.168.190.229/led?num=" + status);
 
             try (CloseableHttpResponse response = httpClient.execute(request)) {
-//                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
-//                String responseBody = EntityUtils.toString(response.getEntity());
-//                System.out.println("Response Body : " + responseBody);
+                System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+                String responseBody = EntityUtils.toString(response.getEntity());
+                System.out.println("Response Body : " + responseBody);
             }
         } catch (Exception e) {
             e.printStackTrace();

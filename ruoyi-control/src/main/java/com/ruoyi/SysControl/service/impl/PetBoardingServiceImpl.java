@@ -90,4 +90,14 @@ public class PetBoardingServiceImpl implements IPetBoardingService
     {
         return petBoardingMapper.deletePetBoardingByBoardingId(boardingId);
     }
+
+    @Override
+    public int updatePetBoardingById(Long boardingId) {
+        return petBoardingMapper.updatePetBoardingById(boardingId);
+    }
+
+    @Override
+    public int updatePetBoardingById2(Long boardingId) {
+        return petBoardingMapper.updatePetBoardingById2(boardingId);
+    }
 }

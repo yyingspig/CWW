@@ -70,3 +70,42 @@ export function sendResetSG90() {
     method: 'get'
   })
 }
+
+export function online() {
+  return request({
+    url: '/SysControl/data/test/online',
+    method: 'get'
+  })
+}
+
+export function online2() {
+  return request({
+    url: '/SysControl/data/test/online2',
+    method: 'get'
+  })
+}
+
+export function setAutoStatus(nValue) {
+  return request({
+    url: '/SysControl/data/test/setAutoStatus/' + nValue,
+    method: 'get'
+  })
+}
+
+export function getAutoStatus() {
+  return request({
+    url: '/SysControl/data/test/getAutoStatus',
+    method: 'get'
+  })
+}
+
+export function updateCron(cron) {
+  return request({
+    url: '/SysControl/data/test/updateCron',
+    method: 'post',
+    data: {
+      cron: cron
+    }
+  })
+}
+

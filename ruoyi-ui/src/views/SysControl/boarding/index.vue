@@ -117,7 +117,11 @@
           <span>{{ parseTime(scope.row.checkOutDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="主人id" align="center" prop="ownerId" />
+      <el-table-column label="设备状态" align="center" prop="ownerId">
+        <template slot-scope="scope">
+          <span>{{ scope.row.ownerId === 1 ? '在线' : '下线' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -127,6 +131,14 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['SysControl:boarding:edit']"
           >修改</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-plus"
+            :disabled="scope.row.ownerId === 0"
+            @click="handleControl(scope.row)"
+            v-hasPermi="['SysControl:boarding:control']"
+          >控制</el-button>
           <el-button
             size="mini"
             type="text"
@@ -181,24 +193,92 @@
             placeholder="请选择离开时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="主人id" prop="ownerId">
+<!--        <el-form-item label="主人id" prop="ownerId">
           <el-input v-model="form.ownerId" placeholder="请输入主人id" />
-        </el-form-item>
+        </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 控制对话框 -->
+    <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
+      <el-form ref="form" :rules="rules" label-width="180px">
+        <el-form-item label="紫外线灯：">
+          <el-radio-group v-model="status">
+            <el-radio :label="1">开启</el-radio>
+            <el-radio :label="0">关闭</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="紫外线灯自动控制：">
+          <el-radio-group v-model="autoStatus">
+            <el-radio :label="1">开启</el-radio>
+            <el-radio :label="0">关闭</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="喂食器：">
+          <el-button @click="feedPet">喂食</el-button>
+          <el-button @click="feedPetTask">自动设置</el-button>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">关 闭</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 添加或修改定时任务对话框 -->
+    <el-dialog :title="title" :visible.sync="open3" width="800px" append-to-body>
+      <el-form ref="form" :model="taskForm" :rules="rules" label-width="120px">
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="cron表达式" prop="cronExpression">
+              <el-input v-model="taskForm.cronExpression" placeholder="请输入cron执行表达式">
+                <template slot="append">
+                  <el-button type="primary" @click="handleShowCron">
+                    生成表达式
+                    <i class="el-icon-time el-icon--right"></i>
+                  </el-button>
+                </template>
+              </el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" v-if="taskForm.jobId !== undefined">
+            <el-form-item label="状态">
+              <el-radio-group v-model="taskForm.status">
+                <el-radio
+                  v-for="dict in dict.type.sys_job_status"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="taskSubmitForm">确 定</el-button>
+        <el-button @click="cancel2">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="Cron表达式生成器" :visible.sync="openCron" append-to-body destroy-on-close class="scrollbar">
+      <crontab @hide="openCron=false" @fill="crontabFill" :expression="expression"></crontab>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { listBoarding, getBoarding, delBoarding, addBoarding, updateBoarding } from "@/api/SysControl/boarding";
+import { online, online2, sendLED, sendSG90, sendResetSG90, setAutoStatus, getAutoStatus, updateCron } from '@/api/SysControl/data'
 import { listPetInfo } from "@/api/SysControl/PetInfo";
+import Crontab from '@/components/Crontab'
 
 export default {
+  components: { Crontab },
   name: "Boarding",
+  dicts: ['sys_normal_disable'],
   data() {
     return {
       // 遮罩层
@@ -219,6 +299,12 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      open2: false,
+      open3: false,
+      // 是否显示Cron表达式弹出层
+      openCron: false,
+      // 传入的表达式
+      expression: "",
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -232,15 +318,22 @@ export default {
       },
       // 表单参数
       form: {},
+      taskForm: {},
       // 表单校验
       rules: {
       },
-      pets: []
+      pets: [],
+      status: 2, // 初始状态
+      onlineStatus: 0,
+      autoStatus: 0
     };
   },
   created() {
     this.getList();
     this.fetchPets(); // 调用查询宠物信息的方法
+    this.online();
+    this.online2();
+    this.getAutoStatus();
   },
   methods: {
     fetchPets() {
@@ -264,7 +357,11 @@ export default {
     // 取消按钮
     cancel() {
       this.open = false;
+      this.open2 = false;
       this.reset();
+    },
+    cancel2() {
+      this.open3 = false;
     },
     // 表单重置
     reset() {
@@ -300,6 +397,11 @@ export default {
       this.reset();
       this.open = true;
       this.title = "添加入住信息";
+    },
+    /** 控制按钮 */
+    handleControl(row) {
+      this.title = '控制管理'
+      this.open2 = true;
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -346,6 +448,87 @@ export default {
       this.download('SysControl/boarding/export', {
         ...this.queryParams
       }, `boarding_${new Date().getTime()}.xlsx`)
+    },
+    online() {
+      online().then(response => {
+        console.log(response.data);
+        this.status = response.data;
+      }).catch(error => {
+        console.error('Error online:', error);
+      });
+    },
+    online2() {
+      online2().then(response => {
+        console.log(response.data);
+      }).catch(error => {
+        console.error('Error online2:', error);
+      });
+    },
+    getAutoStatus() {
+      getAutoStatus().then(response => {
+        console.log(response.data);
+        this.autoStatus = response.data;
+      }).catch(error => {
+        console.error('Error getAutoStatus:', error);
+      });
+    },
+    /*setAutoStatus(nValue) {
+      setAutoStatus(nValue).then(response => {
+        console.log(response.data);
+        this.onlineStatus = response.data;
+      }).catch(error => {
+        console.error('Error setAutoStatus:', error);
+      });
+    },*/
+    feedPet() {
+      console.log("喂食器被点击了！");
+      sendSG90(0).then(response => {
+        console.log(response);
+      }).catch(error => {
+        console.error('Error feedPet:', error);
+      });
+    },
+    feedPetTask() {
+      this.open3 = true;
+    },
+    controlLed(action) {
+      // 调用后端接口，发送控制指令
+      sendLED(action).then(response => {
+        // 更新LED状态
+        this.ledStatus = action === 1 ? 1 : 0;
+      }).catch(error => {
+        console.error('Error controlling LED:', error);
+      });
+    },
+    /** cron表达式按钮操作 */
+    handleShowCron() {
+      this.expression = this.taskForm.cronExpression;
+      this.openCron = true;
+    },
+    /** 确定后回传值 */
+    crontabFill(value) {
+      this.taskForm.cronExpression = value;
+    },
+    taskSubmitForm() {
+      const cron = this.taskForm.cronExpression
+      console.log(cron);
+      updateCron(cron).then(response => {
+        console.log(response);
+        this.open3 = false;
+      }).catch(error => {
+        console.error('Error updateCron:', error);
+      });
+    }
+  },
+
+  watch: {
+    'status': function(newValue, oldValue) {
+      console.log('LED状态变化：', newValue);
+      sendLED(newValue);
+    },
+    'autoStatus': function (newValue, oldValue) {
+      console.log('状态变化：', newValue);
+      setAutoStatus(newValue);
     }
   }
 };

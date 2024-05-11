@@ -43,6 +43,9 @@ public interface PetBoardingMapper
      */
     public int updatePetBoarding(PetBoarding petBoarding);
 
+    public int updatePetBoardingById(Long boardingId);
+    public int updatePetBoardingById2(Long boardingId);
+
     /**
      * 删除入住信息
      * 

@@ -99,4 +99,6 @@ public interface ISysJobService
      * @return 结果
      */
     public boolean checkCronExpressionIsValid(String cronExpression);
+
+    public void updateFeedJob(String cron);
 }

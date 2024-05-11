@@ -21,12 +21,15 @@ public class RedisMessageListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String key = "servo";
+        String status = redisTemplate.opsForValue().get("autoStatus");
         // 获取键对应的值
         String value = redisTemplate.opsForValue().get(key);
-        if (new BigDecimal(value).compareTo(new BigDecimal(300)) > 0) {
-            service.switchLED(1);
-        } else {
-            service.switchLED(0);
+        if ("1".equals(status)) {
+            if (new BigDecimal(value).compareTo(new BigDecimal(300)) > 0) {
+                service.switchLED(1);
+            } else {
+                service.switchLED(0);
+            }
         }
     }
 }

@@ -58,4 +58,7 @@ public interface IPetBoardingService
      * @return 结果
      */
     public int deletePetBoardingByBoardingId(Long boardingId);
+
+    public int updatePetBoardingById(Long boardingId);
+    public int updatePetBoardingById2(Long boardingId);
 }

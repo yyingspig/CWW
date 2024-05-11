@@ -68,6 +68,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where boarding_id = #{boardingId}
     </update>
 
+    <update id="updatePetBoardingById" parameterType="Long">
+        update pet_boarding
+        set owner_id = 1
+        where boarding_id = #{boardingId}
+    </update>
+
+    <update id="updatePetBoardingById2" parameterType="Long">
+        update pet_boarding
+        set owner_id = 0
+        where boarding_id = #{boardingId}
+    </update>
+
     <delete id="deletePetBoardingByBoardingId" parameterType="Long">
         delete from pet_boarding where boarding_id = #{boardingId}
     </delete>
